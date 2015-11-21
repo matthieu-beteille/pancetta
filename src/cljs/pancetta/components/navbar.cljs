@@ -3,28 +3,29 @@
             [pancetta.common.ui :as ui]
             [reagent.core :as reagent :refer [atom]]))
 
-(defonce style {:header-container {:background-color (:grey-dark ui/colors)}
+(def style {:header-container {:background-color (:bg-negative ui/colors)}
 
-                :container {:height 60 :display "flex"
-                            :color (:grey-light ui/colors)
-                            :align-items "stretch"
-                            :flex-direction "row"
-                            :flex-wrap "wrap"
-                            :justify-content "flex-start"
-                            :max-width (:viewport-max ui/layout)
-                            :min-width (:viewport-min ui/layout)
-                            :margin-left "auto"
-                            :margin-right "auto"}
+            :container {:height 60 :display "flex"
+                        :color (:text-negative ui/colors)
+                        :align-items "stretch"
+                        :flex-direction "row"
+                        :flex-wrap "wrap"
+                        :justify-content "flex-start"
+                        :max-width (:viewport-max ui/layout)
+                        :min-width (:viewport-min ui/layout)
+                        :margin-left "auto"
+                        :margin-right "auto"}
 
-                :item {:padding 15 :cursor "pointer"}
+            :item {:padding 15 :cursor "pointer"}
 
-                :item-hovered {:background-color (:grey ui/colors)}
+            :item-hovered {:background-color (:bg-negative-active ui/colors)
+                           :color (:text-negative-active ui/colors)}
 
-                :item-right {:margin-left "auto"}})
+            :item-right {:margin-left "auto"}})
 
 (defn logout [state] (swap! state assoc :user nil))
 
-(defonce items [{:label "Home" :action #(secretary/dispatch! "/")}
+(def items [{:label "Home" :action #(secretary/dispatch! "/")}
                 {:label "Create" :action #(secretary/dispatch! "/create")}
                 {:label "Logout" :action logout :right true}])
 
