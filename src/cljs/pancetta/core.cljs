@@ -34,7 +34,7 @@
       [:div {:style (:page style)}
         (if (= (:user @state) nil)
           [login/login-component state]
-          [(session/get :current-page)])]])
+          [(session/get :current-page) state])]])
 
 ;; routes
 (secretary/set-config! :prefix "#")
