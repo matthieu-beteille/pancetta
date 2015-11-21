@@ -9,6 +9,7 @@
               [pancetta.components.navbar :as navbar]
               [pancetta.components.create :as create]
               [pancetta.components.login :as login]
+              [pancetta.components.tickets :as tickets]
               [pancetta.common.ui :as ui])
     (:import goog.History))
 
@@ -29,21 +30,24 @@
 ;; layout
 (defn current-page []
   [:div
-    (when (not= (:user @state) nil)
+    (when (not= nil (:user @state))
       [navbar/navbar-component state])
-      [:div {:style (:page style)}
-        (if (= (:user @state) nil)
-          [login/login-component state]
-          [(session/get :current-page) state])]])
+    [:div {:style (:page style)}
+      (if (= (:user @state) nil)
+        [login/login-component state]
+        [(:component (session/get :current-page)) state])]])
 
 ;; routes
 (secretary/set-config! :prefix "#")
 
 (secretary/defroute "/" []
-  (session/put! :current-page #'home/home-component))
+  (session/put! :current-page {:name "home" :component #'home/home-component}))
 
 (secretary/defroute "/create" []
-  (session/put! :current-page #'create/create-component))
+  (session/put! :current-page {:name "create" :component #'create/create-component}))
+
+(secretary/defroute "/tickets" []
+  (session/put! :current-page {:name "tickets" :component #'tickets/tickets-component}))
 
 ;; -------------------------
 ;; History

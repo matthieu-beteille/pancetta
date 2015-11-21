@@ -5,7 +5,8 @@
 (defn login [state]
   (.authWithOAuthPopup (:root @state) "facebook"
    (fn [error user]
-     (swap! state assoc :user (aget user "uid")))))
+     (when (nil? error)
+      (swap! state assoc :user (aget user "uid"))))))
 
 (defn login-component [state]
   (println state)
