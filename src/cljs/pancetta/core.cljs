@@ -8,7 +8,8 @@
               [pancetta.components.home :as home]
               [pancetta.components.navbar :as navbar]
               [pancetta.components.create :as create]
-              [pancetta.components.login :as login])
+              [pancetta.components.login :as login]
+              [pancetta.common.ui :as ui])
     (:import goog.History))
 
 ;; firebase connection
@@ -19,7 +20,11 @@
 (defonce state (atom {:user nil :root (m/connect firebase-url)}))
 
 ;; style
-(defonce style {:page {:padding 20}})
+(defonce style {:page {:padding 20
+                        :max-width (:viewport-max ui/layout)
+                        :min-width (:viewport-min ui/layout)
+                        :margin-left "auto"
+                        :margin-right "auto"}})
 
 ;; layout
 (defn current-page []
