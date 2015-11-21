@@ -1,9 +1,10 @@
 (ns pancetta.components.create
   (:require [reagent.core :as reagent :refer [atom]]
+            [pancetta.common.ui :as ui]
             [matchbox.core :as m]))
 
-(defonce cities ["London" "Paris" "Bruxelles"])
-(defonce currencies {:gbp "£" :eur "€"})
+(def cities ["London" "Paris" "Bruxelles"])
+(def currencies {:gbp "£" :eur "€"})
 (defonce ticket (atom {:from (cities 0)
                        :to (cities 1)
                        :on (-> (js/Date.) .toISOString (.slice 0 10))
@@ -27,12 +28,15 @@
     (m/conj! tickets-ref @ticket)))
 
 (defn create-component [state]
-  [:div [:h2 "Enter the details of your ticket"]
+  [:div {:class-name "rounded"
+         :style {:background-color (:bg-widget ui/colors)
+                 :padding "20px 40px"}}
+    [:h2 "Enter the details of your ticket"]
     [:div "Go from: " (:from @ticket)
           " to: " (:to @ticket)
           " on: " (:on @ticket)
           " for: " (get-in @ticket [:price :amount])]
-    [:div
+    [:form {:class-name "pure-form"}
       [:div [select-city :from]]
       [:div [select-city :to]]
       [:div
@@ -49,5 +53,6 @@
                  :on-change #(swap! ticket assoc-in [:price :amount] (-> % .-target .-value))
                  }]]]
      [:div [:input {:type "submit"
+                    :class-name "pure-button"
                     :on-click #(submit state)
                     :value "Upload the damn ticket"}]]])
