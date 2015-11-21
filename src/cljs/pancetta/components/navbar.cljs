@@ -1,12 +1,13 @@
 (ns pancetta.components.navbar
   (:require [secretary.core :as secretary :include-macros true]
-            [pancetta.common.ui :as ui]))
+            [pancetta.common.ui :as ui]
+            [reagent.core :as reagent :refer [atom]]))
 
 (defonce style {:header-container {:background-color (:grey-dark ui/colors)}
 
                 :container {:height 60 :display "flex"
                             :color (:grey-light ui/colors)
-                            :align-items "center"
+                            :align-items "stretch"
                             :flex-direction "row"
                             :flex-wrap "wrap"
                             :justify-content "flex-start"
@@ -15,16 +16,29 @@
                             :margin-left "auto"
                             :margin-right "auto"}
 
-                :item {:margin 10 :cursor "pointer"}
+                :item {:padding 15 :cursor "pointer"}
 
-                :logout {:margin-left "auto"}})
+                :item-hovered {:background-color (:grey ui/colors)}
 
-(defn logout [state]
-  (swap! state assoc :user nil))
+                :item-right {:margin-left "auto"}})
+
+(defn logout [state] (swap! state assoc :user nil))
+
+(defonce items [{:label "Home" :action #(secretary/dispatch! "/")}
+                {:label "Create" :action #(secretary/dispatch! "/create")}
+                {:label "Logout" :action logout :right true}])
 
 (defn navbar-component [state]
-  [:div {:style (:header-container style)}
-    [:div {:style (:container style)}
-      [:div {:style (:item style) :on-click #(secretary/dispatch! "/")} "Home"]
-      [:div {:style (:item style) :on-click #(secretary/dispatch! "/create")} "Create"]
-      [:div {:style (merge (:item style) (:logout style)) :on-click #(logout state)} "Logout"]]])
+  (let [hovered (atom nil)]
+    (fn []
+      [:div {:style (:header-container style)}
+        [:div {:style (:container style)}
+          (doall (map-indexed
+            (fn [idx item]
+              [:div {:style (merge (:item style)
+                                    (if (:right item) (:item-right style))
+                                    (if (= @hovered idx) (:item-hovered style)))
+                      :on-click #((:action item) state)
+                      :on-mouse-over #(reset! hovered idx)
+                      :on-mouse-out #(reset! hovered nil)
+                      :key idx} (:label item)]) items))]])))
