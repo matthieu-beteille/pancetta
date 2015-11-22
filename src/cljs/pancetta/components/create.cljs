@@ -1,5 +1,6 @@
 (ns pancetta.components.create
   (:require [reagent.core :as reagent :refer [atom]]
+            [secretary.core :as secretary]
             [pancetta.common.ui :as ui]
             [matchbox.core :as m]))
 
@@ -41,7 +42,8 @@
   (let [user (:user @state)
         root (:root @state)
         tickets-ref (m/get-in root [:tickets user])]
-    (m/conj! tickets-ref @ticket)))
+    (m/conj! tickets-ref @ticket)
+    (secretary/dispatch! "/tickets")))
 
 (defn create-component [state]
   [:div {:class-name "rounded"

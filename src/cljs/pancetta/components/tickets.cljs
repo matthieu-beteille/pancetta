@@ -24,7 +24,7 @@
 (defn tickets-component [state]
   (let [child (m/get-in (:root @state) [:tickets (:user @state)])
         tickets (atom nil)]
-    (m/listen-to child :value #(reset! tickets (get % 1)))
+    (m/listen-to child :value #(reset! tickets (-> (get % 1) reverse)))
     (fn []
       (if (nil? @tickets)
         [:div "You have no tickets"]
