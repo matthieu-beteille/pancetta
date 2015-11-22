@@ -10,13 +10,32 @@
                        :on (-> (js/Date.) .toISOString (.slice 0 10))
                        :price {:currency :gbp}}))
 
-(defn select-city [direction]
+(defn city-selector [direction]
  [:select
    {:on-change #(swap! ticket assoc direction (-> % .-target .-value))
-    :value (direction @ticket)
-    :style {:font-size 20}}
+    :value (direction @ticket)}
    (for [city cities]
      [:option {:key city :value city} city])])
+
+(defn date-picker []
+  [:input {:type "date"
+           :value (:on @ticket)
+           :on-change #(swap! ticket assoc :on (-> % .-target .-value))}])
+
+(defn price-form []
+  [:span
+    [:select
+      {:value
+        (get-in @ticket [:price :currency])
+       :on-change
+        #(swap! ticket assoc-in [:price :currency] (-> % .-target .-value))}
+      (for [[currency symbol] currencies]
+        [:option {:key currency :value currency} symbol])]
+    [:input {:type "number"
+             :class-name "pure-input-1-4"
+             :value (get-in @ticket [:price :amount])
+             :on-change #(swap! ticket assoc-in [:price :amount] (-> % .-target .-value))
+             }]])
 
 (defn submit [state]
   (let [user (:user @state)
@@ -29,27 +48,22 @@
          :style {:background-color (:bg-widget ui/colors)
                  :padding "20px 40px"}}
     [:h2 "Enter the details of your ticket"]
-    [:div "Go from: " (:from @ticket)
-          " to: " (:to @ticket)
-          " on: " (:on @ticket)
-          " for: " (get-in @ticket [:price :amount])]
-    [:form {:class-name "pure-form"}
-      [:div [select-city :from]]
-      [:div [select-city :to]]
+    [:form {:class-name "pure-form"
+            :style {:font-size 20
+                    :line-height 4}}
       [:div
-        [:input {:type "date"
-                 :value (:on @ticket)
-                 :on-change #(swap! ticket assoc :on (-> % .-target .-value))}]]
-      [:div
-        [:select {:value (get-in @ticket [:price :currency])
-                  :on-change #(swap! ticket assoc-in [:price :currency] (-> % .-target .-value))}
-          (for [[currency symbol] currencies]
-            [:option {:key currency :value currency} symbol])]
-        [:input {:type "number"
-                 :value (get-in @ticket [:price :amount])
-                 :on-change #(swap! ticket assoc-in [:price :amount] (-> % .-target .-value))
-                 }]]]
-     [:div [:input {:type "submit"
-                    :class-name "pure-button"
-                    :on-click #(submit state)
-                    :value "Upload the damn ticket"}]]])
+        "This is a train from "
+        [city-selector :from]
+        " to "
+        [city-selector :to]
+        [:br] "On the "
+        [date-picker]
+        [:br] "For the lovely price of "
+        [price-form]
+        [:br]
+        [:input {:type "button"
+                 :disabled (<= (get-in @ticket [:price :amount]) 0)
+                 :style {:margin-top 30}
+                 :class-name "button-primary pure-button"
+                 :on-click #(submit state)
+                 :value "Upload the damn ticket"}]]]])
