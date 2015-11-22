@@ -21,10 +21,7 @@
 (defn submit [state]
   (let [user (:user @state)
         root (:root @state)
-        tickets-ref (m/get-in root [:tickets])
-        user-ref (m/get-in root [:users user])]
-    (m/conj! user-ref @ticket)
-    (swap! ticket assoc :owner user)
+        tickets-ref (m/get-in root [:tickets user])]
     (m/conj! tickets-ref @ticket)))
 
 (defn create-component [state]
