@@ -12,20 +12,23 @@
                     :font-weight "bold"
                     :color (:error ui/colors)}})
 
-(defn ticket-component [user-root [id ticket]]
+(defn ticket-component [state [id ticket]]
   [:div {:style (:item style)}
     [:span "Ticket from " (:from ticket)]
     [:span " to " (:to ticket)]
     [:span " on " (:on ticket)]
     [:span " for " (get-in ticket [:price :amount])]
     [:span {:style (:cross style)
-            :on-click #(m/remove! (m/get-in user-root id))} "Delete"]])
+            :on-click #(m/remove! (m/get-in (:root @state) [:tickets id]))} "Delete"]])
 
 (defn tickets-component [state]
-  (let [child (m/get-in (:root @state) [:tickets (:user @state)])
+  (let [child (->
+                (m/get-in (:root @state) :tickets)
+                (.orderByChild "owner")
+                (.equalTo (:user @state)))
         tickets (atom nil)]
     (m/listen-to child :value #(reset! tickets (-> (get % 1) reverse)))
     (fn []
       (if (nil? @tickets)
         [:div "You have no tickets"]
-        [:div (map #(-> [:div {:key (get % 0)} [ticket-component child %]]) @tickets)]))))
+        [:div (map #(-> [:div {:key (get % 0)} [ticket-component state %]]) @tickets)]))))
