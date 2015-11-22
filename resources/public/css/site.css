@@ -38,3 +38,10 @@ body {
 .rounded {
   border-radius: 3px;
 }
+
+.button-primary {
+  border-color: #67b972;
+  border-bottom-color: #4aa256;
+  color: #fff;
+  background-color: #67b972;
+}
