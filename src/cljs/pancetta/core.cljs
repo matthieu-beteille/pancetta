@@ -18,7 +18,8 @@
 (defonce firebase-url (str "https://" firebase-app-name ".firebaseio.com"))
 
 ;; app state
-(defonce state (atom {:user nil :root (m/connect firebase-url)}))
+(defonce state (atom {:user nil
+                      :root (m/connect firebase-url)}))
 
 ;; style
 (defonce style {:page {:padding 20
@@ -29,25 +30,32 @@
 
 ;; layout
 (defn current-page []
-  [:div
-    (when (not= nil (:user @state))
-      [navbar/navbar-component state])
-    [:div {:style (:page style)}
-      (if (= (:user @state) nil)
-        [login/login-component state]
-        [(:component (session/get :current-page)) state])]])
+  (let [current-page (session/get :current-page)
+        is-public-page (not (:private current-page))
+        is-logged-in (not (nil? (:user @state)))]
+    [:div
+      [navbar/navbar-component state]
+      [:div {:style (:page style)}
+        (if (or is-logged-in is-public-page)
+          [(:component current-page) state]
+          [login/login-component state])]]))
 
 ;; routes
 (secretary/set-config! :prefix "#")
 
 (secretary/defroute "/" []
-  (session/put! :current-page {:name "home" :component #'home/home-component}))
+  (session/put! :current-page {:name "home"
+                               :component #'home/home-component}))
 
 (secretary/defroute "/create" []
-  (session/put! :current-page {:name "create" :component #'create/create-component}))
+  (session/put! :current-page {:name "create"
+                               :component #'create/create-component
+                               :private true}))
 
 (secretary/defroute "/tickets" []
-  (session/put! :current-page {:name "tickets" :component #'tickets/tickets-component}))
+  (session/put! :current-page {:name "tickets"
+                               :component #'tickets/tickets-component
+                               :private true}))
 
 ;; -------------------------
 ;; History
