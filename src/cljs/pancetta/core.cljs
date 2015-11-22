@@ -10,6 +10,7 @@
               [pancetta.components.create :as create]
               [pancetta.components.login :as login]
               [pancetta.components.tickets :as tickets]
+              [pancetta.components.ticket :as ticket]
               [pancetta.common.ui :as ui])
     (:import goog.History))
 
@@ -56,6 +57,10 @@
   (session/put! :current-page {:name "tickets"
                                :component #'tickets/tickets-component
                                :private true}))
+
+(secretary/defroute "/ticket/:user-id/:id" [user-id id]
+  (session/put! :current-page {:name "ticket"
+                               :component (partial #'ticket/ticket-component user-id id)}))
 
 ;; -------------------------
 ;; History
