@@ -41,7 +41,8 @@
 (defn submit [state]
   (let [user (:user @state)
         root (:root @state)
-        tickets-ref (m/get-in root [:tickets user])]
+        tickets-ref (m/get-in root [:tickets])]
+    (swap! ticket assoc :owner user)
     (m/conj! tickets-ref @ticket)
     (secretary/dispatch! "/tickets")))
 
