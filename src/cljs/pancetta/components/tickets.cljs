@@ -1,5 +1,6 @@
 (ns pancetta.components.tickets
   (:require [matchbox.core :as m]
+            [secretary.core :as secretary :include-macros true]
             [pancetta.common.ui :as ui]
             [reagent.core :as reagent :refer [atom]]))
 
@@ -7,19 +8,50 @@
                    :border-radius 3
                    :margin-bottom 2
                    :padding 20}
-            :cross {:float "right"
-                    :cursor "pointer"
-                    :font-weight "bold"
-                    :color (:error ui/colors)}})
+            :share-box {:background-color (:bg-widget ui/colors)
+                        :border-radius 3
+                        :margin-bottom 2
+                        :padding 20
+                        :display "flex"
+                        :justify-content "space-between"}
+            :share-link {:flex-grow 1 :margin-left 20}
+            :share-btn {:float "right"
+                        :margin-right 20
+                        :font-weight "bold"
+                        :cursor "pointer"}
+            :go-btn {:margin-left 10
+                     :font-weight "bold"
+                     :cursor "pointer"}
+            :delete-btn {:float "right"
+                         :cursor "pointer"
+                         :font-weight "bold"
+                         :color (:error ui/colors)}})
 
-(defn ticket-component [state [id ticket]]
-  [:div {:style (:item style)}
-    [:span "Ticket from " (:from ticket)]
-    [:span " to " (:to ticket)]
-    [:span " on " (:on ticket)]
-    [:span " for " (get-in ticket [:price :amount])]
-    [:span {:style (:cross style)
-            :on-click #(m/remove! (m/get-in (:root @state) [:tickets id]))} "Delete"]])
+(defn price-to-str [price]
+  (let [currency {:gbp "£" :eur "€"}]
+    (str ((keyword (:currency price)) currency)
+         (:amount price))))
+
+(defn ticket-component [state id ticket]
+  (let [expanded (atom false)]
+    (fn []
+      [:div
+        [:div {:style (:item style)}
+          [:span "Ticket from " (:from ticket)]
+          [:span " to " (:to ticket)]
+          [:span " on " (:on ticket)]
+          [:span " for " (price-to-str (:price ticket))]
+          [:span {:style (:delete-btn style)
+                  :on-click #(m/remove! (m/get-in (:root @state) [:tickets id]))} "Delete"]
+          [:span {:style (:share-btn style)
+                  :on-click (fn [] (swap! expanded #(not %)))} "Share"]]
+        (if @expanded
+          (let [share-url (str "/ticket/" (name id))]
+            [:div {:style (:share-box style)}
+              [:span "URL: "]
+              [:input {:type "text" :disabled "true" :style (:share-link style)
+                       :value (str "http://localhost:3000/#" share-url)}]
+              [:span {:style (:go-btn style) :on-click #(secretary/dispatch! share-url)} "GO"]]))])))
 
 (defn tickets-component [state]
   (let [child (->
@@ -33,4 +65,5 @@
         [:div "You have no tickets"]
         [:div
           [:h2 "My tickets"]
-          (map #(-> [:div {:key (get % 0)} [ticket-component state %]]) @tickets)]))))
+          (for [[id ticket] @tickets]
+            [:div {:key id} [ticket-component state id ticket]])]))))

@@ -11,8 +11,8 @@
                      :padding 20}
             :btn {:margin-left "auto"}})
 
-(defn ticket-component [user-id ticket-id state]
-  (let [child (m/get-in (:root @state) [:tickets user-id ticket-id])
+(defn ticket-component [ticket-id state]
+  (let [child (m/get-in (:root @state) [:tickets ticket-id])
         ticket (atom nil)]
     (m/listen-to child :value #(reset! ticket (get % 1)))
     (fn []
