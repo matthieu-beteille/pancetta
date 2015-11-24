@@ -58,9 +58,9 @@
                                :component #'tickets/tickets-component
                                :private true}))
 
-(secretary/defroute "/ticket/:user-id/:id" [user-id id]
+(secretary/defroute "/ticket/:id" [id]
   (session/put! :current-page {:name "ticket"
-                               :component (partial #'ticket/ticket-component user-id id)}))
+                               :component (partial #'ticket/ticket-component id)}))
 
 ;; -------------------------
 ;; History
