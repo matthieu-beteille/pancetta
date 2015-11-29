@@ -20,6 +20,7 @@
 
 (defn date-picker []
   [:input {:type "date"
+           :min (-> (js/Date.) .toISOString (.slice 0 10))
            :value (:on @ticket)
            :on-change #(swap! ticket assoc :on (-> % .-target .-value))}])
 
