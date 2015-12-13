@@ -9,7 +9,8 @@
 (defonce ticket (atom {:from (cities 0)
                        :to (cities 1)
                        :on (-> (js/Date.) .toISOString (.slice 0 10))
-                       :price {:currency :gbp}}))
+                       :at "07:42"
+                       :price {:currency :gbp :amount 35}}))
 
 (defn city-selector [direction]
  [:select
@@ -23,6 +24,13 @@
            :min (-> (js/Date.) .toISOString (.slice 0 10))
            :value (:on @ticket)
            :on-change #(swap! ticket assoc :on (-> % .-target .-value))}])
+
+(defn time-input []
+  [:input {:type "text"
+           :class-name "pure-input-1-4"
+           :style {:text-align "center"}
+           :value (:at @ticket)
+           :on-change #(swap! ticket assoc :at (-> % .-target .-value))}])
 
 (defn price-form []
   [:span
@@ -62,6 +70,8 @@
         [city-selector :to]
         [:br] "On the "
         [date-picker]
+        " at "
+        [time-input]
         [:br] "For the lovely price of "
         [price-form]
         [:br]
