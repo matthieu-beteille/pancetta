@@ -1,0 +1,15 @@
+box: wercker/default
+build:
+  steps:
+    - script:
+        name: install clojure
+        code: |
+          sudo add-apt-repository ppa:openjdk-r/ppa -y
+          sudo apt-get update
+          sudo apt-get install openjdk-8-jdk curl -y
+          sudo wget -O /usr/local/bin/lein https://raw.github.com/technomancy/leiningen/stable/bin/lein
+          sudo chmod +x /usr/local/bin/lein
+    - script:
+        name: build
+        code: |
+          lein do clean, uberjar

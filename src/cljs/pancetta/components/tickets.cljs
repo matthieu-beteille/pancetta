@@ -2,6 +2,7 @@
   (:require [matchbox.core :as m]
             [secretary.core :as secretary :include-macros true]
             [pancetta.common.ui :as ui]
+            [pancetta.common.helpers :as h :refer [price-to-str]]
             [reagent.core :as reagent :refer [atom]]))
 
 (def style {:item {:background-color (:bg-widget ui/colors)
@@ -27,11 +28,6 @@
                          :font-weight "bold"
                          :color (:error ui/colors)}})
 
-(defn price-to-str [price]
-  (let [currency {:gbp "£" :eur "€"}]
-    (str ((keyword (:currency price)) currency)
-         (:amount price))))
-
 (defn ticket-component [state id ticket]
   (let [expanded (atom false)]
     (fn []
@@ -49,8 +45,13 @@
           (let [share-url (str "/ticket/" (name id))]
             [:div {:style (:share-box style)}
               [:span "URL: "]
-              [:input {:type "text" :disabled "true" :style (:share-link style)
-                       :value (str "http://localhost:3000/#" share-url)}]
+              [:input {:type "text" :style (:share-link style)
+                       :value (str js/window.location.protocol
+                                   "//"
+                                   js/window.location.hostname
+                                   (when (not= js/window.location.port "")
+                                     (str ":" js/window.location.port))
+                                   "/#" share-url)}]
               [:span {:style (:go-btn style) :on-click #(secretary/dispatch! share-url)} "GO"]]))])))
 
 (defn tickets-component [state]
