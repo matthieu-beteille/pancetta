@@ -1,6 +1,6 @@
-(ns pancetta.common.helpers)
+(ns pancetta.common.helpers
+  (:require [pancetta.domain :refer [currencies]]))
 
 (defn price-to-str [price]
-  (let [currency {:gbp "£" :eur "€"}]
-    (str ((keyword (:currency price)) currency)
-         (:amount price))))
+  (str (get-in price [:currency :symbol])
+       (:amount price)))

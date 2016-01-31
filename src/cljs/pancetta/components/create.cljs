@@ -1,16 +1,20 @@
 (ns pancetta.components.create
-  (:require [reagent.core :as reagent :refer [atom]]
+  (:require [pancetta.domain :as p :refer [cities currencies]]
+            [reagent.core :as reagent :refer [atom]]
+            [schema.core :as s :include-macros true]
             [secretary.core :as secretary]
             [pancetta.common.ui :as ui]
             [matchbox.core :as m]))
 
-(def cities ["London" "Paris" "Bruxelles"])
-(def currencies {:gbp "£" :eur "€"})
-(defonce ticket (atom {:from (cities 0)
-                       :to (cities 1)
-                       :on (-> (js/Date.) .toISOString (.slice 0 10))
-                       :at "07:42"
-                       :price {:currency :gbp :amount 35}}))
+;(def cities ["London" "Paris" "Bruxelles"])
+;(def currencies {:gbp "£" :eur "€"})
+;(defonce ticket (atom {:from (cities 0)
+;                       :to (cities 1)
+;                       :on (-> (js/Date.) .toISOString (.slice 0 10))
+;                       :at "07:42"
+;                       :price {:currency :gbp :amount 35}}))
+
+(defonce ticket (atom (p/make-default-ticket)))
 
 (defn city-selector [direction]
  [:select
@@ -36,15 +40,19 @@
   [:span
     [:select
       {:value
-        (get-in @ticket [:price :currency])
+        ((clojure.set/map-invert currencies) (get-in @ticket [:price :currency]))
        :on-change
-        #(swap! ticket assoc-in [:price :currency] (-> % .-target .-value))}
-      (for [[currency symbol] currencies]
-        [:option {:key currency :value currency} symbol])]
+        #(swap! ticket assoc-in
+                [:price :currency]
+                (get
+                  currencies
+                  (keyword (-> % .-target .-value))))}
+      (for [[k  {:keys [symbol]}] currencies]
+        [:option {:key k :value k} symbol])]
     [:input {:type "number"
              :class-name "pure-input-1-4"
              :value (get-in @ticket [:price :amount])
-             :on-change #(swap! ticket assoc-in [:price :amount] (-> % .-target .-value))
+             :on-change #(swap! ticket assoc-in [:price :amount] (-> % .-target .-value  (js/parseInt 10)))
              }]])
 
 (defn submit [state]
@@ -52,6 +60,7 @@
         root (:root @state)
         tickets-ref (m/get-in root [:tickets])]
     (swap! ticket assoc :owner user)
+    (s/validate p/Ticket @ticket)
     (m/conj! tickets-ref @ticket)
     (secretary/dispatch! "/tickets")))
 
